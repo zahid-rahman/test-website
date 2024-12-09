@@ -1,4 +1,7 @@
-import type { MetaFunction } from "@netlify/remix-runtime";
+import { json, type MetaFunction } from "@remix-run/node";
+import { Link, useLoaderData } from "@remix-run/react";
+import axios from "axios";
+import { IPost } from "~/interfaces/Post";
 
 export const meta: MetaFunction = () => {
   return [
@@ -7,35 +10,52 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+export const loader = async () => {
+  const response = await axios({
+    method: "get",
+    url: "https://jsonplaceholder.typicode.com/posts?_limit=5",
+  });
+
+  const data = await response.data;
+  return json({ posts: data });
+};
+
 export default function Index() {
+  const { posts } = useLoaderData<typeof loader>();
+
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <h1>Welcome to My remix app</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/blog"
-            rel="noreferrer"
-          >
-            15m Quickstart Blog Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/jokes"
-            rel="noreferrer"
-          >
-            Deep Dive Jokes App Tutorial
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div className="px-0 py-12">
+      <div className="w-full max-w-md mx-auto">
+        {/* List Box Container */}
+        <div className="max-h-auto overflow-y-auto">
+          {/* List Box Header */}
+
+          {/* List Box Items */}
+          <ul role="listbox" className="">
+            {/* List Item 1 */}
+
+            {posts.map((post: IPost, index: number) => {
+              return (
+                <li
+                  key={index}
+                  className="px-4 py-6 hover:bg-blue-50 flex items-center space-x-4 border border-1 mb-2 rounded-md"
+                >
+                  <img
+                    src="https://via.placeholder.com/40"
+                    alt="Avatar 1"
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div>
+                    <h3 className="text-gray-800 font-medium">{post.title}</h3>
+                    <p className="text-gray-500 text-sm mt-3">{post.body}</p>
+                    <Link className="bg-purple-600 text-sm px-2 py-1 text-white rounded-md"  to={`/posts/details/${post.id}`}>view link</Link>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
